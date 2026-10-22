@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hierarchy Mirror Studio — Interactive Binary Tree Visualizer</title>
+  <meta name="description" content="A diagramming tool to flip a hierarchical structure horizontally using recursion. Complete FA-2 Data Structures and Algorithms visualizer powered by C++17 and WebAssembly.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232563eb'%3E%3Ccircle cx='12' cy='5' r='3'/%3E%3Ccircle cx='6' cy='19' r='3'/%3E%3Ccircle cx='18' cy='19' r='3'/%3E%3Cpath stroke='%232563eb' stroke-width='2' d='M12 8v4M12 12l-4 4M12 12l4 4'/%3E%3C/svg%3E">
+</head>
+<body>
+
+  <!-- ========================================================================
+       TOP NAVIGATION BAR
+       ======================================================================== -->
+  <header class="app-header">
+    <div class="brand-section">
+      <div class="brand-logo-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="5" r="3"></circle>
+          <circle cx="6" cy="19" r="3"></circle>
+          <circle cx="18" cy="19" r="3"></circle>
+          <path d="M12 8v4M12 12l-4 4M12 12l4 4"></path>
+        </svg>
+      </div>
+      <div class="brand-titles">
+        <h1 class="brand-title">Hierarchy Mirror Studio</h1>
+        <span class="brand-subtitle">Visualize · Mirror · Understand</span>
+      </div>
+    </div>
+
+    <nav class="nav-links">
+      <button class="nav-btn active" data-scroll="visualizer-section">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Visualizer
+      </button>
+      <button class="nav-btn" data-scroll="stepper-section">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Stepper
+      </button>
+      <button class="nav-btn" data-scroll="traversals-section">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        Traversals
+      </button>
+      <button class="nav-btn" data-scroll="code-studio-section">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        C++17 Engine
+      </button>
+      <button class="nav-btn" id="btn-how-it-works">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        How It Works
+      </button>
+      <button class="nav-btn" id="btn-about">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        About
+      </button>
+    </nav>
+
+    <div class="header-actions">
+      <!-- WebAssembly Engine Pill -->
+      <div class="engine-badge" id="engine-status-badge" title="WebAssembly Execution Runtime">
+        <span class="engine-pulse"></span>
+        <span id="engine-status-text">WebAssembly Engine: Active</span>
+      </div>
+
+      <!-- Export PNG Button -->
+      <button class="btn btn-outline" id="btn-export-png" title="Export High-Resolution Visualizer Snapshot">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export PNG
+      </button>
+
+      <!-- Theme Switcher -->
+      <button class="icon-btn" id="btn-theme-toggle" title="Toggle Light/Dark Theme">
+        <svg id="theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg id="theme-icon-moon" style="display:none;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       APPLICATION LAYOUT & SIDEBAR
+       ======================================================================== -->
+  <div class="app-layout">
+    
+    <!-- LEFT SIDEBAR -->
+    <aside class="app-sidebar">
+      <div>
+        <div class="sidebar-heading">Navigation & Actions</div>
+        <ul class="sidebar-menu">
+          <li>
+            <button class="sidebar-item-btn active" id="side-btn-build">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+              Build Tree
+            </button>
+          </li>
+          <li>
+            <button class="sidebar-item-btn" id="side-btn-mirror">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+              Mirror Tree
+            </button>
+          </li>
+          <li>
+            <button class="sidebar-item-btn" id="side-btn-traversal">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              Traversal
+            </button>
+          </li>
+          <li>
+            <button class="sidebar-item-btn" id="side-btn-recursion">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              Recursion
+            </button>
+          </li>
+          <li>
+            <button class="sidebar-item-btn" id="side-btn-complexity">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Complexity
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Sample Tree Presets -->
+      <div>
+        <div class="sidebar-heading">Sample Tree Presets</div>
+        <div class="sidebar-preset-list">
+          <div class="preset-card" data-preset="balanced">
+            <div class="preset-card-title">
+              <span>1. Balanced Tree</span>
+              <span class="card-tag tag-blue">Full</span>
+            </div>
+            <div class="preset-card-val">1, 2, 3, 4, 5, 6, 7</div>
+          </div>
+
+          <div class="preset-card" data-preset="left-skewed">
+            <div class="preset-card-title">
+              <span>2. Left-Skewed Tree</span>
+              <span class="card-tag tag-blue">Skewed</span>
+            </div>
+            <div class="preset-card-val">1, 2, null, 3, null, null, null, 4</div>
+          </div>
+
+          <div class="preset-card" data-preset="right-skewed">
+            <div class="preset-card-title">
+              <span>3. Right-Skewed Tree</span>
+              <span class="card-tag tag-violet">Skewed</span>
+            </div>
+            <div class="preset-card-val">1, null, 2, null, 3, null, 4</div>
+          </div>
+
+          <div class="preset-card" data-preset="missing-children">
+            <div class="preset-card-title">
+              <span>4. Missing Children</span>
+              <span class="card-tag tag-blue">Sparse</span>
+            </div>
+            <div class="preset-card-val">1, 2, 3, null, 4, 5, null</div>
+          </div>
+
+          <div class="preset-card" data-preset="single-node">
+            <div class="preset-card-title">
+              <span>5. Single-Node Tree</span>
+              <span class="card-tag tag-violet">Base</span>
+            </div>
+            <div class="preset-card-val">42</div>
+          </div>
+
+          <div class="preset-card" data-preset="custom">
+            <div class="preset-card-title">
+              <span>6. Custom Input</span>
+              <span class="card-tag tag-blue">Edit</span>
+            </div>
+            <div class="preset-card-val">Type custom level-order...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tree Metrics Widget -->
+      <div class="sidebar-metrics-card">
+        <div class="sidebar-heading" style="padding:0; margin-bottom:0.4rem;">Tree Telemetry</div>
+        <div class="metrics-row">
+          <span>Node Count:</span>
+          <span class="metrics-val" id="metric-nodes">7</span>
+        </div>
+        <div class="metrics-row">
+          <span>Tree Height:</span>
+          <span class="metrics-val" id="metric-height">3</span>
+        </div>
+        <div class="metrics-row">
+          <span>Leaf Nodes:</span>
+          <span class="metrics-val" id="metric-leaves">4</span>
+        </div>
+        <div class="metrics-row">
+          <span>Tree Type:</span>
+          <span class="metrics-val" id="metric-type" style="color:var(--primary-blue);">Balanced</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ======================================================================
+         MAIN CONTENT DASHBOARD
+         ====================================================================== -->
+    <main class="app-main">
+
+      <!-- Hero Section -->
+      <section class="hero-card" id="hero-section">
+        <div class="hero-text-content">
+          <div class="hero-badge">FA-2 Data Structures & Algorithms · C++17 & WebAssembly</div>
+          <h2 class="hero-heading">Hierarchy Mirror Studio</h2>
+          <p class="hero-subtitle">
+            A diagramming tool to flip a hierarchical structure horizontally using recursion.
+            Swaps the left and right subtrees of every node recursively to construct an exact geometric and topological mirror reflection.
+          </p>
+          <div class="hero-meta-badges">
+            <span class="meta-pill"><strong>Problem:</strong> Mirror Binary Tree</span>
+            <span class="meta-pill"><strong>Technique:</strong> Divide & Conquer (DFS)</span>
+            <span class="meta-pill"><strong>Time:</strong> O(N)</span>
+            <span class="meta-pill"><strong>Space:</strong> O(H)</span>
+            <span class="meta-pill"><strong>WASM:</strong> Linear Memory Native Exec</span>
+          </div>
+        </div>
+
+        <!-- Hero Mini Interactive Illustration -->
+        <div class="hero-illustration">
+          <svg class="hero-mini-preview-svg" viewBox="0 0 280 100">
+            <!-- Left mini tree -->
+            <path d="M 50 20 C 50 35, 30 35, 30 50" stroke="#93c5fd" stroke-width="2" fill="none"/>
+            <path d="M 50 20 C 50 35, 70 35, 70 50" stroke="#93c5fd" stroke-width="2" fill="none"/>
+            <circle cx="50" cy="20" r="10" fill="#3b82f6"/>
+            <text x="50" y="20" fill="#fff" font-size="9" font-weight="bold" text-anchor="middle" dominant-baseline="central">1</text>
+            <circle cx="30" cy="50" r="8" fill="#06b6d4"/>
+            <text x="30" y="50" fill="#fff" font-size="8" font-weight="bold" text-anchor="middle" dominant-baseline="central">2</text>
+            <circle cx="70" cy="50" r="8" fill="#06b6d4"/>
+            <text x="70" y="50" fill="#fff" font-size="8" font-weight="bold" text-anchor="middle" dominant-baseline="central">3</text>
+
+            <!-- Center mirror axis -->
+            <line x1="140" y1="10" x2="140" y2="90" stroke="#7c3aed" stroke-dasharray="4 4" stroke-width="1.5"/>
+            <text x="140" y="96" fill="#7c3aed" font-size="8" font-weight="bold" text-anchor="middle">MIRROR AXIS</text>
+
+            <!-- Right mirrored mini tree -->
+            <path d="M 230 20 C 230 35, 210 35, 210 50" stroke="#d8b4fe" stroke-width="2" fill="none"/>
+            <path d="M 230 20 C 230 35, 250 35, 250 50" stroke="#d8b4fe" stroke-width="2" fill="none"/>
+            <circle cx="230" cy="20" r="10" fill="#8b5cf6"/>
+            <text x="230" y="20" fill="#fff" font-size="9" font-weight="bold" text-anchor="middle" dominant-baseline="central">1</text>
+            <circle cx="210" cy="50" r="8" fill="#ec4899"/>
+            <text x="210" y="50" fill="#fff" font-size="8" font-weight="bold" text-anchor="middle" dominant-baseline="central">3</text>
+            <circle cx="250" cy="50" r="8" fill="#ec4899"/>
+            <text x="250" y="50" fill="#fff" font-size="8" font-weight="bold" text-anchor="middle" dominant-baseline="central">2</text>
+          </svg>
+        </div>
+      </section>
+
+      <!-- Tree Input Panel -->
+      <section class="input-panel-card" id="input-section">
+        <div class="input-panel-header">
+          <div class="panel-title-group">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            <h3 class="panel-title">Tree Input Specification</h3>
+            <span class="panel-badge">Level-Order BFS Notation</span>
+          </div>
+          <span style="font-size:0.8rem; color:var(--text-muted);">Use numbers, separated by commas. Use <code>null</code> for empty spots.</span>
+        </div>
+
+        <div class="input-row">
+          <input 
+            type="text" 
+            id="tree-input-box" 
+            class="tree-input-field" 
+            value="1, 2, 3, 4, 5, 6, 7" 
+            placeholder="e.g. 1, 2, 3, 4, 5, 6, 7 or 1, 2, null, 3, 4"
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <div class="input-actions">
+            <button class="btn btn-primary" id="btn-build-tree">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+              Build Tree
+            </button>
+            <button class="btn btn-violet" id="btn-mirror-tree">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+              Mirror Tree
+            </button>
+            <button class="btn btn-outline" id="btn-reset-tree" title="Reset to default tree">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
+              Reset
+            </button>
+          </div>
+        </div>
+
+        <div class="input-feedback" id="input-feedback">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span id="feedback-text">Valid level-order representation. Ready to visualize and mirror.</span>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           MAIN DUAL TREE VISUALIZATION STUDIO
+           ==================================================================== -->
+      <section class="tree-studio-container" id="visualizer-section">
+        
+        <!-- Left Card: Original Binary Tree -->
+        <div class="tree-card original-card">
+          <div class="tree-card-header">
+            <div class="card-title-group">
+              <span class="card-indicator-dot dot-blue"></span>
+              <h3 class="tree-card-title">Original Binary Tree</h3>
+              <span class="card-tag tag-blue">Input Structure</span>
+            </div>
+            <div class="canvas-controls">
+              <button class="control-btn" id="orig-zoom-in" title="Zoom In">+</button>
+              <button class="control-btn" id="orig-zoom-out" title="Zoom Out">−</button>
+              <button class="control-btn" id="orig-zoom-reset" title="Reset View">1:1</button>
+              <button class="control-btn" id="orig-zoom-fit" title="Fit to View">⛶</button>
+            </div>
+          </div>
+          
+          <div class="tree-canvas-viewport" id="orig-viewport">
+            <svg class="tree-svg" id="orig-tree-svg">
+              <defs>
+                <linearGradient id="origGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#3b82f6"/>
+                  <stop offset="100%" stop-color="#06b6d4"/>
+                </linearGradient>
+              </defs>
+              <g id="orig-tree-group"></g>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Center Divider / Mirror Axis Line -->
+        <div class="mirror-plane-axis">
+          <div class="axis-line"></div>
+          <div class="axis-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="8" x2="6" y2="8"/><line x1="18" y1="16" x2="6" y2="16"/><polyline points="9 5 6 8 9 11"/><polyline points="15 13 18 16 15 19"/></svg>
+            <span>↔ Reflection Axis</span>
+          </div>
+        </div>
+
+        <!-- Right Card: Mirrored Binary Tree -->
+        <div class="tree-card mirrored-card">
+          <div class="tree-card-header">
+            <div class="card-title-group">
+              <span class="card-indicator-dot dot-violet"></span>
+              <h3 class="tree-card-title">Mirrored Binary Tree</h3>
+              <span class="card-tag tag-violet">Recursive Output</span>
+            </div>
+            <div class="canvas-controls">
+              <button class="control-btn" id="mirr-zoom-in" title="Zoom In">+</button>
+              <button class="control-btn" id="mirr-zoom-out" title="Zoom Out">−</button>
+              <button class="control-btn" id="mirr-zoom-reset" title="Reset View">1:1</button>
+              <button class="control-btn" id="mirr-zoom-fit" title="Fit to View">⛶</button>
+            </div>
+          </div>
+
+          <div class="tree-canvas-viewport" id="mirr-viewport">
+            <svg class="tree-svg" id="mirr-tree-svg">
+              <defs>
+                <linearGradient id="mirrGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#8b5cf6"/>
+                  <stop offset="100%" stop-color="#ec4899"/>
+                </linearGradient>
+              </defs>
+              <g id="mirr-tree-group"></g>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           RECURSION STEPPER & CALL STACK PANEL
+           ==================================================================== -->
+      <section class="stepper-panel" id="stepper-section">
+        <div class="stepper-controls-row">
+          <div class="stepper-btn-group">
+            <button class="btn btn-violet" id="btn-stepper-play">
+              <svg id="stepper-play-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <span id="stepper-play-text">Auto Animate</span>
+            </button>
+            <button class="btn btn-outline" id="btn-stepper-prev" title="Step Back">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
+              Prev Step
+            </button>
+            <button class="btn btn-outline" id="btn-stepper-next" title="Step Forward">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+              Next Step
+            </button>
+            <button class="btn btn-outline" id="btn-stepper-reset" title="Reset Stepper">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+              Reset
+            </button>
+          </div>
+
+          <div class="speed-control-group">
+            <span>Speed:</span>
+            <select id="stepper-speed" class="speed-select">
+              <option value="1200">Slow (1.2s)</option>
+              <option value="700" selected>Normal (0.7s)</option>
+              <option value="300">Fast (0.3s)</option>
+            </select>
+            <span class="step-progress-badge" id="stepper-progress">Step: 0 / 0</span>
+          </div>
+        </div>
+
+        <!-- Current Step Status Banner -->
+        <div class="stepper-status-card">
+          <div class="status-text-desc" id="stepper-desc">
+            Click <strong>"Auto Animate"</strong> or <strong>"Next Step"</strong> to watch the recursive swap algorithm traverse the tree and swap subtrees in WebAssembly.
+          </div>
+          <div class="status-callstack-tag" id="stepper-active-call">mirror(root)</div>
+        </div>
+
+        <!-- Active Call Stack Visualizer -->
+        <div>
+          <div class="sidebar-heading" style="padding:0; margin-bottom:0.4rem;">Active Recursion Call Stack (Frames)</div>
+          <div class="call-stack-container" id="call-stack-list">
+            <!-- Dynamically populated stack frames -->
+            <div class="stack-frame-box active">
+              <span class="frame-label">Stack Base</span>
+              <span class="frame-func">mirror(root)</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           TRAVERSALS & DSA PROPERTIES
+           ==================================================================== -->
+      <section class="traversals-grid" id="traversals-section">
+        
+        <!-- Level-Order Traversal (BFS) -->
+        <div class="traversal-card">
+          <div class="traversal-card-header">
+            <h4 class="traversal-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+              Level-Order Traversal (BFS)
+            </h4>
+            <span class="card-tag tag-blue">Breadth-First</span>
+          </div>
+
+          <div class="traversal-compare-row">
+            <div class="compare-block">
+              <span class="compare-label">
+                <span>Original Tree (Level by Level)</span>
+                <span id="orig-bfs-summary" style="font-family:monospace; color:var(--primary-blue);">[1, 2, 3, 4, 5, 6, 7]</span>
+              </span>
+              <div class="badge-row" id="orig-bfs-badges"></div>
+            </div>
+
+            <div class="compare-block">
+              <span class="compare-label">
+                <span>Mirrored Tree (Level by Level)</span>
+                <span id="mirr-bfs-summary" style="font-family:monospace; color:var(--mirrored-violet);">[1, 3, 2, 7, 6, 5, 4]</span>
+              </span>
+              <div class="badge-row" id="mirr-bfs-badges"></div>
+            </div>
+          </div>
+
+          <div class="property-callout">
+            <strong>Key BFS Property:</strong> At each depth $d$, the sequence of nodes in the mirrored tree is the exact reversal of the original level sequence!
+          </div>
+        </div>
+
+        <!-- In-Order Traversal (DFS) -->
+        <div class="traversal-card">
+          <div class="traversal-card-header">
+            <h4 class="traversal-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              In-Order Traversal (Left, Root, Right)
+            </h4>
+            <span class="card-tag tag-violet">Depth-First</span>
+          </div>
+
+          <div class="traversal-compare-row">
+            <div class="compare-block">
+              <span class="compare-label">Original In-Order</span>
+              <div class="badge-row" id="orig-inorder-badges"></div>
+            </div>
+
+            <div class="compare-block">
+              <span class="compare-label">Mirrored In-Order</span>
+              <div class="badge-row" id="mirr-inorder-badges"></div>
+            </div>
+          </div>
+
+          <div class="property-callout">
+            <strong>Fundamental DSA Theorem:</strong> The in-order traversal of a mirrored binary tree is mathematically identical to the reverse of the original tree's in-order traversal!
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ====================================================================
+           COMPLEXITY & ALGORITHM ANALYSIS
+           ==================================================================== -->
+      <section class="complexity-grid" id="complexity-section">
+        
+        <div class="complexity-card">
+          <div class="complexity-badge badge-time">O(N)</div>
+          <h4 class="complexity-title">Time Complexity</h4>
+          <p class="complexity-desc">
+            Every node in the tree is visited exactly once during the recursive traversal.
+            At each node, swapping the two pointer references (<code>left</code> and <code>right</code>) is an $O(1)$ constant time operation.
+            Hence, total runtime scales linearly: $T(N) = 2T(N/2) + O(1) \implies O(N)$.
+          </p>
+        </div>
+
+        <div class="complexity-card">
+          <div class="complexity-badge badge-space">O(H)</div>
+          <h4 class="complexity-title">Auxiliary Space Complexity</h4>
+          <p class="complexity-desc">
+            Auxiliary space is dictated entirely by the maximum depth of the call stack during recursion.
+            For a balanced binary tree, the height $H = \lceil \log_2(N+1) \rceil \implies O(\log N)$.
+            In the worst degenerate case (e.g. left or right skewed tree), $H = N \implies O(N)$.
+          </p>
+        </div>
+
+        <div class="complexity-card">
+          <div class="complexity-badge" style="color:var(--success-green);">C++17 & WASM</div>
+          <h4 class="complexity-title">Memory & Execution Engine</h4>
+          <p class="complexity-desc">
+            Tree nodes are allocated in WebAssembly linear memory. Pointer manipulation occurs via 32-bit offset loads/stores.
+            Native C++17 binary <code>tree_mirror.exe</code> runs directly via MinGW GCC, guaranteeing zero garbage collection overhead.
+          </p>
+        </div>
+
+      </section>
+
+      <!-- ====================================================================
+           CODE & ARCHITECTURE STUDIO
+           ==================================================================== -->
+      <section class="code-studio-card" id="code-studio-section">
+        <div class="code-tabs-header">
+          <div class="tab-btn-group">
+            <button class="code-tab-btn active" data-tab="cpp">C++17 Implementation (tree_mirror.cpp)</button>
+            <button class="code-tab-btn" data-tab="wat">WebAssembly Text (tree_mirror.wat)</button>
+            <button class="code-tab-btn" data-tab="js">JavaScript Controller (app.js)</button>
+          </div>
+
+          <div class="code-actions-group">
+            <button class="btn btn-outline" id="btn-download-cpp" style="padding:0.35rem 0.75rem; font-size:0.78rem;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download C++
+            </button>
+            <button class="btn btn-outline" id="btn-copy-code" style="padding:0.35rem 0.75rem; font-size:0.78rem;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy Code
+            </button>
+          </div>
+        </div>
+
+        <div class="code-block-wrapper">
+          <pre><code id="code-display-block"></code></pre>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ========================================================================
+       FOOTER
+       ======================================================================== -->
+  <footer class="app-footer">
+    <div>
+      <strong>Hierarchy Mirror Studio</strong> — FA-2 Data Structures & Algorithms Project
+    </div>
+    <div>
+      Problem: Mirror Binary Tree Using Recursion · C++17 · WebAssembly · JavaScript
+    </div>
+  </footer>
+
+  <!-- ========================================================================
+       "HOW IT WORKS" MODAL
+       ======================================================================== -->
+  <div class="modal-overlay" id="modal-how-it-works">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 class="modal-title">How It Works: Recursive Hierarchy Inversion</h3>
+        <button class="modal-close-btn" data-close="modal-how-it-works">&times;</button>
+      </div>
+      <div>
+        <h4 style="margin-bottom:0.5rem; color:var(--primary-blue);">1. The Practical Scenario</h4>
+        <p style="color:var(--text-muted); margin-bottom:1rem; line-height:1.5;">
+          Modern vector diagramming tools (such as Lucidchart, Miro, and Figma) frequently need to invert hierarchical charts horizontally.
+          Key applications include:
+        </p>
+        <ul style="margin-left:1.5rem; color:var(--text-muted); margin-bottom:1rem; line-height:1.6;">
+          <li><strong>Localization & RTL Support:</strong> Flipping organizational charts and decision trees for Right-to-Left writing systems (e.g. Arabic, Hebrew, Urdu).</li>
+          <li><strong>Compiler Abstract Syntax Trees (AST):</strong> Inverting binary expression trees to convert operators or verify associative symmetry.</li>
+          <li><strong>Graphic Layout Engines:</strong> Mirroring branch layouts for balanced visual aesthetic in mind maps and dependency graphs.</li>
+        </ul>
+
+        <h4 style="margin-bottom:0.5rem; color:var(--mirrored-violet);">2. The Divide & Conquer Recursive Algorithm</h4>
+        <p style="color:var(--text-muted); margin-bottom:1rem; line-height:1.5;">
+          At any given node <code>root</code>:
+        </p>
+        <ol style="margin-left:1.5rem; color:var(--text-muted); margin-bottom:1rem; line-height:1.6;">
+          <li><strong>Base Case:</strong> If <code>root == nullptr</code>, return <code>nullptr</code>.</li>
+          <li><strong>Recurse Left:</strong> Mirror the left subtree: <code>leftMirrored = mirror(root->left)</code>.</li>
+          <li><strong>Recurse Right:</strong> Mirror the right subtree: <code>rightMirrored = mirror(root->right)</code>.</li>
+          <li><strong>Swap:</strong> Swap pointers on the current node: <code>root->left = rightMirrored; root->right = leftMirrored;</code>.</li>
+          <li><strong>Return:</strong> Return <code>root</code>.</li>
+        </ol>
+
+        <h4 style="margin-bottom:0.5rem; color:var(--success-green);">3. Mathematical Induction Proof</h4>
+        <p style="color:var(--text-muted); line-height:1.5;">
+          <strong>Base Step:</strong> An empty tree or single-node tree has its children vacuously inverted.<br>
+          <strong>Inductive Hypothesis:</strong> Assume <code>mirror(root->left)</code> correctly produces the mirror reflection of the left subtree, and <code>mirror(root->right)</code> correctly produces the mirror reflection of the right subtree.<br>
+          <strong>Inductive Step:</strong> Swapping the mirrored right subtree to the left and the mirrored left subtree to the right produces the complete geometric reflection across the vertical plane. By induction, the algorithm holds for all finite binary trees of size $N \ge 0$.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       "ABOUT" MODAL
+       ======================================================================== -->
+  <div class="modal-overlay" id="modal-about">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 class="modal-title">About Hierarchy Mirror Studio</h3>
+        <button class="modal-close-btn" data-close="modal-about">&times;</button>
+      </div>
+      <div>
+        <p style="color:var(--text-muted); margin-bottom:1rem; line-height:1.5;">
+          <strong>Hierarchy Mirror Studio</strong> is an interactive engineering visualizer built for the college FA-2 Data Structures and Algorithms curriculum.
+        </p>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:1rem; font-size:0.88rem;">
+          <tr style="border-bottom:1px solid var(--border-subtle);">
+            <td style="padding:0.5rem 0; font-weight:700;">Problem Statement:</td>
+            <td style="padding:0.5rem 0; color:var(--text-muted);">Mirror a Binary Tree Using Recursion</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border-subtle);">
+            <td style="padding:0.5rem 0; font-weight:700;">Core Data Structure:</td>
+            <td style="padding:0.5rem 0; color:var(--text-muted);">Binary Tree with Node Pointers</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border-subtle);">
+            <td style="padding:0.5rem 0; font-weight:700;">Engine Technology:</td>
+            <td style="padding:0.5rem 0; color:var(--text-muted);">C++17 (tree_mirror.cpp) & WebAssembly (tree_mirror.wasm)</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border-subtle);">
+            <td style="padding:0.5rem 0; font-weight:700;">Frontend Stack:</td>
+            <td style="padding:0.5rem 0; color:var(--text-muted);">HTML5 Canvas/SVG, Modern CSS3, Vanilla ES6 JavaScript</td>
+          </tr>
+          <tr>
+            <td style="padding:0.5rem 0; font-weight:700;">Academic Course:</td>
+            <td style="padding:0.5rem 0; color:var(--text-muted);">Data Structures and Algorithms (FA-2)</td>
+          </tr>
+        </table>
+        <p style="color:var(--text-muted); font-size:0.82rem;">
+          Includes automated test suites, native Windows MinGW executable, WebAssembly binary bytecode, SVG zoom/pan controls, and PNG snapshot export.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load WebAssembly Bytecode and Main Application Script -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>
